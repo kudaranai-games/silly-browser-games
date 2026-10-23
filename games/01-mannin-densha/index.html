@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>満員電車押し込みパズル</title>
+  <meta name="description" content="ドアが閉まるまでの10秒で、ホームの乗客を車内へ押し込む。">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <header>
+      <h1>満員電車押し込みパズル</h1>
+      <button id="mute-btn" type="button" aria-pressed="false">🔊 音あり</button>
+    </header>
+
+    <div id="stage">
+      <canvas id="stage-canvas" width="400" height="640" aria-label="ホームと車両"></canvas>
+      <section id="intro" class="panel" hidden>
+        <p>ホームの乗客を<strong>ドラッグして車内へ投げ込んで</strong>ください。</p>
+        <p>最初の1人をつかむと、発車まで10秒のカウントが始まります。ドアに挟まった人は減点です。</p>
+        <button id="intro-ok" type="button">わかりました</button>
+      </section>
+    </div>
+
+    <section id="result" class="panel" hidden>
+      <p class="tier" id="result-tier"></p>
+      <p id="result-detail"></p>
+      <p id="result-pinched"></p>
+      <p id="result-verdict"></p>
+      <p id="best-info"></p>
+      <button id="next-btn" class="primary" type="button">次の電車</button>
+      <p class="hint">画面タップでも次へ進めます</p>
+      <div class="buttons">
+        <button id="share-btn" type="button">Xでシェア</button>
+        <button id="save-btn" type="button">画像を保存</button>
+      </div>
+    </section>
+  </main>
+  <script src="../../shared/vendor/matter-js/matter.min.js"></script>
+  <script type="module" src="main.js"></script>
+  <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "76bbf8c0533a4bb3b4cc39ed04113fff"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>

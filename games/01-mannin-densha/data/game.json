@@ -1,0 +1,21 @@
+{
+  "timeLimitSec": 10,
+  "capacity": 5,
+  "maxPassengers": 40,
+  "pinchPenalty": 30,
+  "passengers": [
+    { "id": "salaryman", "label": "会社員", "w": 32, "h": 72, "density": 0.002, "friction": 0.5, "weight": 5, "clothes": "#34405a", "skin": "#f1c9a5" },
+    { "id": "backpack", "label": "リュックの人", "w": 52, "h": 70, "density": 0.0018, "friction": 0.8, "weight": 2, "clothes": "#5a7d4f", "skin": "#e8bf98", "bag": "#c8742c" },
+    { "id": "ojisan", "label": "おじさん", "w": 38, "h": 64, "density": 0.0022, "friction": 0.4, "weight": 2, "spin": 0.12, "clothes": "#7a6a58", "skin": "#e9b98f", "bald": true },
+    { "id": "student", "label": "学生", "w": 26, "h": 58, "density": 0.0015, "friction": 0.5, "weight": 3, "clothes": "#1f2a44", "skin": "#f3cfae" },
+    { "id": "luggage", "label": "大荷物の人", "w": 48, "h": 68, "density": 0.003, "friction": 0.6, "weight": 1, "clothes": "#8a4b5c", "skin": "#efc4a0", "bag": "#3d3d3d" }
+  ],
+  "tiers": [
+    { "id": "garagara", "min": 0, "label": "がらがら", "verdict": "座れます。" },
+    { "id": "tsujo", "min": 100, "label": "通常運行", "verdict": "定刻どおり発車します。" },
+    { "id": "yaya", "min": 150, "label": "やや混雑", "verdict": "つり革は取り合いです。" },
+    { "id": "rush", "min": 200, "label": "通勤ラッシュ", "verdict": "新聞はもう読めません。" },
+    { "id": "oshiya", "min": 250, "label": "押し屋の鑑", "verdict": "駅員さんが拍手しています。" },
+    { "id": "genkai", "min": 300, "label": "物理法則の向こう側", "verdict": "車両が少し膨らんでいます。" }
+  ]
+}
