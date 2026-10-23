@@ -7,11 +7,12 @@
 
 | パス | 内容 |
 |---|---|
-| `index.html` | ゲーム一覧ページ |
-| `shared/` | 全ゲーム共通のモジュール（乱数・保存・シェアなど）と同梱ライブラリ（`vendor/`） |
+| `index.html` | ゲーム一覧ページ。ゲームを追加したらここにリンクを足す（足さないとビルドが失敗する） |
+| `shared/` | 全ゲーム共通のモジュール（乱数・保存・シェアなど） |
 | `games/<番号>-<名前>/` | 1ゲーム1フォルダ。`logic/` は DOM に依存しない判定ロジックで、`tests/` でテストする |
 | `tools/serve.mjs` | 開発用のローカルサーバー |
-| `tools/build.mjs` | （未作成）公開用ファイルを `dist/pages/`（GitHub Pages）と `dist/itch/`（itch.io 用 zip）に出力する |
+| `tools/build.mjs` | 公開用ファイルを `dist/pages/` に出力する |
+| `.github/workflows/pages.yml` | main への push で、テスト → ビルド → GitHub Pages へのデプロイを行う |
 
 ## ローカルで遊ぶ
 
@@ -28,3 +29,15 @@ npm run serve
 ```sh
 npm test
 ```
+
+## 公開
+
+```sh
+npm run build
+```
+
+- `index.html`・`shared/`・`games/` だけを `dist/pages/` にコピーする。`tests/` と `*.test.js` は除く。
+- JS・CSS・データの参照に `?v=<コミットのハッシュ>` を付け、更新後に古いキャッシュが使われないようにする。
+- 出力を検査し、参照切れ・ビルドIDの付け忘れ・テストの混入・一覧ページからのリンク漏れがあれば失敗する。
+
+GitHub Pages の公開元（Settings → Pages → Source）は「GitHub Actions」にする。

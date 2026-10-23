@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test \"games/*/tests/**/*.test.js\" \"shared/**/*.test.js\"",
-    "serve": "node tools/serve.mjs"
+    "test": "node --test \"games/*/tests/**/*.test.js\" \"shared/**/*.test.js\" \"tools/**/*.test.mjs\"",
+    "serve": "node tools/serve.mjs",
+    "build": "node tools/build.mjs"
   }
 }

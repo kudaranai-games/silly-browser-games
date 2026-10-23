@@ -20,7 +20,9 @@ const canvas = $("paper");
 const ctx = setupCanvas(canvas);
 const sfx = createSfx();
 
-const data = await (await fetch("./data/game.json")).json();
+// 公開時は main.js?v=<ビルドID> で読まれるので、同じクエリをデータにも付けて古いキャッシュを避ける
+const dataUrl = new URL(`./data/game.json${new URL(import.meta.url).search}`, import.meta.url);
+const data = await (await fetch(dataUrl)).json();
 let best = loadBest();
 let muted = load(MUTED_KEY, false) === true;
 
