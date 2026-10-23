@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>お辞儀ハンコ</title>
+  <meta name="description" content="上司の印の方へ、ちょうどよく傾けてハンコを押す。">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <header>
+      <h1>お辞儀ハンコ</h1>
+      <button id="mute-btn" type="button" aria-pressed="false">🔊 音あり</button>
+    </header>
+
+    <div id="stage">
+      <canvas id="paper" width="400" height="640" aria-label="稟議書"></canvas>
+      <section id="intro" class="panel" hidden>
+        <p>稟議書には、自分のハンコを<strong>上司の印の方へ少し傾けて</strong>押す「お辞儀ハンコ」という作法がある、とされています。</p>
+        <p>揺れるハンコを、推奨角度ぴったりのところで押してください。</p>
+        <button id="intro-ok" type="button">わかりました</button>
+      </section>
+    </div>
+
+    <div id="controls">
+      <button id="stamp-btn" class="primary" type="button">押す</button>
+      <p class="hint">画面タップ・スペースキーでも押せます</p>
+    </div>
+
+    <section id="result" class="panel" hidden>
+      <p class="tier" id="result-tier"></p>
+      <p id="result-detail"></p>
+      <p id="best-info"></p>
+      <button id="next-btn" class="primary" type="button">次の稟議書</button>
+      <p class="hint">画面タップ・スペースキーでも次へ進めます</p>
+      <div class="buttons">
+        <button id="share-btn" type="button">Xでシェア</button>
+        <button id="save-btn" type="button">画像を保存</button>
+      </div>
+    </section>
+  </main>
+  <script type="module" src="main.js"></script>
+</body>
+</html>

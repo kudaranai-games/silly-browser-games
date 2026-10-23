@@ -1,0 +1,6 @@
+# 企画メモは別の private リポジトリで管理する
+planning/
+
+# 生成物
+dist/
+node_modules/

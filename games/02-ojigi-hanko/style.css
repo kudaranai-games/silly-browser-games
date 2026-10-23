@@ -1,0 +1,105 @@
+:root {
+  --bg: #e9e4d8;
+  --text: #2b2620;
+  --muted: #6b6257;
+  --panel: #fffdf8;
+  --border: #cfc6b5;
+  --ink: #c42a2a;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, "Hiragino Sans", "Yu Gothic UI", sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+main {
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 12px 16px 32px;
+}
+
+header { position: relative; }
+
+#mute-btn {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 4px 10px;
+  font-size: 0.8rem;
+}
+
+h1 {
+  margin: 4px 0 12px;
+  font-size: 1.3rem;
+  font-family: "Yu Mincho", "Hiragino Mincho ProN", serif;
+  text-align: center;
+  letter-spacing: 0.2em;
+}
+
+#stage { position: relative; }
+
+/* 押すボタンまで1画面に収まるよう、高さが足りなければ幅を縮める（400:640 の比率） */
+canvas {
+  display: block;
+  width: 100%;
+  max-width: calc((100svh - 150px) * 400 / 640);
+  min-width: 240px;
+  margin: 0 auto;
+  height: auto;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+#controls { text-align: center; margin-top: 12px; }
+.hint { margin: 6px 0 0; font-size: 0.8rem; color: var(--muted); }
+
+button {
+  font: inherit;
+  padding: 10px 18px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+  cursor: pointer;
+}
+
+button.primary {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+  font-weight: bold;
+}
+
+#stamp-btn { width: 100%; padding: 16px; font-size: 1.3rem; letter-spacing: 0.3em; }
+
+.panel {
+  margin-top: 12px;
+  padding: 16px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.panel p { margin: 0 0 10px; line-height: 1.6; }
+#intro {
+  position: absolute;
+  top: 18%;
+  left: 0;
+  right: 0;
+  margin: 0;
+  text-align: left;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+}
+#intro button { display: block; margin: 0 auto; }
+
+.tier { font-size: 1.6rem; font-weight: bold; color: var(--ink); font-family: "Yu Mincho", "Hiragino Mincho ProN", serif; }
+.buttons { display: flex; gap: 8px; justify-content: center; margin-top: 16px; }
+#best-info { font-size: 0.9rem; color: var(--muted); }
+#next-btn { width: 100%; padding: 14px; font-size: 1.1rem; }
