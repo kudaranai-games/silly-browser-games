@@ -60,7 +60,7 @@ test("build: 実際のプロジェクトから、公開してよいファイル�
   assert.match(main, /from "\.\.\/\.\.\/shared\/storage\.js\?v=t3st"/);
 });
 
-test("validate: 参照切れ・ID の付け忘れ・テストの混入・リンク漏れを見つける", async (t) => {
+test("validate: 参照切れ・ID の付け忘れ・テストの混入・リンク漏れ・アクセス解析の入れ忘れを見つける", async (t) => {
   const outDir = await mkdtemp(join(tmpdir(), "silly-build-"));
   t.after(() => rm(outDir, { recursive: true, force: true }));
   const { files } = await build({ outDir, buildId: "t3st" });
@@ -69,6 +69,8 @@ test("validate: 参照切れ・ID の付け忘れ・テストの混入・リン�
   const src = await readFile(main, "utf8");
   await writeFile(main, src.replace('"./render.js?v=t3st"', '"./render.js"') + '\nimport "./missing.js?v=t3st";\n');
   await writeFile(join(outDir, "index.html"), (await readFile(join(outDir, "index.html"), "utf8")).replace('href="games/02-ojigi-hanko/"', 'href="games/"'));
+  const gameHtml = join(outDir, "games/02-ojigi-hanko/index.html");
+  await writeFile(gameHtml, (await readFile(gameHtml, "utf8")).replace(/<!-- Cloudflare Web Analytics -->.*<!-- End Cloudflare Web Analytics -->/, ""));
   const leakedTest = join(outDir, "shared/rng.test.js");
   await writeFile(leakedTest, "");
 
@@ -78,6 +80,7 @@ test("validate: 参照切れ・ID の付け忘れ・テストの混入・リン�
     "games/02-ojigi-hanko/main.js: 参照先がない ./missing.js?v=t3st",
     "shared/rng.test.js: テスト用のファイルが含まれている",
     "index.html: games/02-ojigi-hanko/ へのリンクがない",
+    "games/02-ojigi-hanko/index.html: アクセス解析のスクリプトがない",
   ];
   assert.deepEqual(expected.filter((p) => !problems.includes(p)), []);
 });

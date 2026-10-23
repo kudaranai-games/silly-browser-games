@@ -3,7 +3,7 @@
 //
 // - 公開するのは index.html・shared/・games/ だけ。その中の tests/ と *.test.js は除く。
 // - ブラウザに古いJS・CSSを使わせないよう、相対参照に ?v=<ビルドID> を付ける。
-// - 出力を検査し、問題があれば失敗する（参照切れ、ID の付け忘れ、テストの混入、一覧ページからのリンク漏れ）。
+// - 出力を検査し、問題があれば失敗する（参照切れ、ID の付け忘れ、テストの混入、一覧ページからのリンク漏れ、アクセス解析の入れ忘れ）。
 
 import { cp, rm, mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join, dirname, relative, resolve } from "node:path";
@@ -17,6 +17,8 @@ const PUBLISH = ["index.html", "shared", "games"];
 const JS_IMPORT = /(\bfrom\s*|\bimport\s*\(\s*|\bimport\s+)(["'])(\.{1,2}\/[^"']*)\2/g;
 // HTML の src / href
 const HTML_REF = /(\s(?:src|href)=)(["'])([^"']*)\2/g;
+// 全ページに入れる Cloudflare Web Analytics のスクリプト
+const ANALYTICS_BEACON = "https://static.cloudflareinsights.com/beacon.min.js";
 
 export async function build({ outDir = join(ROOT, "dist", "pages"), buildId = defaultBuildId() } = {}) {
   await rm(outDir, { recursive: true, force: true });
@@ -67,6 +69,7 @@ export async function validate(outDir, files, buildId) {
       for (const [, , , ref] of src.matchAll(HTML_REF)) {
         if (isLocalRef(ref)) check(file, ref, /\.(js|css)(\?|$)/.test(ref));
       }
+      if (!src.includes(ANALYTICS_BEACON)) problems.push(`${rel}: アクセス解析のスクリプトがない`);
     }
   }
 
