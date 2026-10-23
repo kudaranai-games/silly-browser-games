@@ -2,7 +2,7 @@
 
 import { shakeOffset, drawFlash, drawImpactLines, drawConfetti } from "../../shared/effects.js";
 import { TIMELINE, verdictHits, countUp } from "./effects.js";
-import { CAR, PLATFORM } from "./logic/world.js";
+import { CAR, PLATFORM, isInside } from "./logic/world.js";
 
 export const W = 400;
 export const H = 640;
@@ -42,6 +42,11 @@ export function drawScene(ctx, scene) {
   const squish = vt === null ? 0 : Math.min(1, (vt - TIMELINE.squish) / 120);
   const pinched = new Set(result?.pinchedIds ?? []);
   for (const p of scene.passengers) drawPassenger(ctx, p, squish, pinched.has(p.id));
+  for (const p of scene.passengers) {
+    if (p.dashing) drawDash(ctx, p);
+    // 特別な乗客は、車内に入るまで★を出す
+    if (p.type.bonus > 0 && vt === null && !isInside(p.body.position)) drawStar(ctx, p);
+  }
   drawDoor(ctx, scene.door);
   ctx.restore();
 
@@ -179,29 +184,48 @@ function drawDoor(ctx, door) {
 // squish: ドアが閉まった衝撃で顔がつぶれる度合い 0〜1
 function drawPassenger(ctx, { body, type }, squish, isPinched) {
   const { w, h } = type;
-  const bagW = type.bag ? 14 : 0;
+  const bagW = type.bagW ?? (type.bag ? 14 : 0);
   const pw = w - bagW; // 人の部分の幅
   const px = -w / 2 + pw / 2; // 人の中心
-  const r = Math.max(9, pw * 0.36);
-  const headY = -h / 2 + r + 1;
+  const top = h / 2 - (type.personH ?? h); // 人の頭のてっぺん（ギターの人はケースが頭より上に出る）
+  const r = Math.max(9, Math.min(pw * 0.36, 13));
+  const headY = top + r + 1;
+  const bagX = w / 2 - bagW; // 荷物の左端
   ctx.save();
   ctx.translate(body.position.x, body.position.y);
   ctx.rotate(body.angle);
   ctx.scale(1 - 0.12 * squish, 1);
-  // 荷物
+  // 背負っている荷物（体より奥）
+  ctx.fillStyle = type.bag;
   if (type.id === "backpack") {
-    ctx.fillStyle = type.bag;
-    roundRect(ctx, w / 2 - bagW - 2, -h / 2 + r * 2, bagW + 2, h * 0.45, 5);
+    roundRect(ctx, bagX - 2, top + r * 2, bagW + 2, h * 0.45, 5);
     ctx.fill();
-  } else if (type.bag) {
-    ctx.fillStyle = type.bag;
-    roundRect(ctx, w / 2 - bagW - 2, h / 2 - h * 0.42, bagW + 2, h * 0.42, 3);
+  } else if (type.id === "climber") {
+    // 頭より高い登山リュックと、上に載せたマット
+    roundRect(ctx, bagX - 4, -h / 2 + 10, bagW + 4, h * 0.62, 8);
+    ctx.fill();
+    ctx.fillStyle = "#e9c43a";
+    roundRect(ctx, bagX - 2, -h / 2, bagW, 12, 6);
+    ctx.fill();
+  } else if (type.id === "guitar") {
+    // ギターケース（細いネックと、太い胴）
+    roundRect(ctx, bagX + 3, -h / 2, bagW - 6, h * 0.45, 3);
+    ctx.fill();
+    roundRect(ctx, bagX - 2, -h / 2 + h * 0.4, bagW + 2, h * 0.58, 7);
     ctx.fill();
   }
   // 体
   ctx.fillStyle = type.clothes;
   roundRect(ctx, px - pw / 2, headY + r - 2, pw, h / 2 - headY - r + 2, 7);
   ctx.fill();
+  // 手に持っている荷物（体より手前）
+  if (type.id === "luggage") {
+    ctx.fillStyle = type.bag;
+    roundRect(ctx, bagX - 2, h / 2 - h * 0.42, bagW + 2, h * 0.42, 3);
+    ctx.fill();
+  } else if (type.id === "plush") {
+    drawBear(ctx, bagX + bagW / 2 - 6, 4, type.bag);
+  }
   // 頭
   ctx.save();
   ctx.translate(px, headY);
@@ -345,6 +369,70 @@ function drawVerdict(ctx, { vt, result, seed }) {
     drawImpactLines(ctx, W, H, cx, numY, t, seed);
     drawFlash(ctx, W, H, t, score >= 200 ? "#fff" : "rgba(196, 42, 42, 0.6)");
   }
+}
+
+// 抱えている巨大なクマのぬいぐるみ。(x, y) はおなかの中心。
+function drawBear(ctx, x, y, color) {
+  ctx.fillStyle = color;
+  for (const [dx, dy, rr] of [[0, 0, 15], [0, -20, 11], [-9, -29, 4.5], [9, -29, 4.5], [-13, 12, 6], [13, 12, 6]]) {
+    ctx.beginPath();
+    ctx.arc(x + dx, y + dy, rr, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.fillStyle = "#f2dcc0";
+  ctx.beginPath();
+  ctx.arc(x, y - 16, 5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#2b2620";
+  for (const dx of [-4, 4]) {
+    ctx.beginPath();
+    ctx.arc(x + dx, y - 23, 1.4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+// 駆け込み乗車の人の、走っている勢いの線と叫び声
+function drawDash(ctx, { body, type }) {
+  const { x, y } = body.position;
+  ctx.save();
+  ctx.strokeStyle = "rgba(43, 38, 32, 0.6)";
+  ctx.lineWidth = 2;
+  for (const [dy, len] of [[-18, 26], [0, 34], [18, 22]]) {
+    ctx.beginPath();
+    ctx.moveTo(x - type.w / 2 - 6, y + dy);
+    ctx.lineTo(x - type.w / 2 - 6 - len, y + dy);
+    ctx.stroke();
+  }
+  // 吹き出し
+  const bx = x + 8;
+  const by = y - type.h / 2 - 20;
+  ctx.fillStyle = "#fff";
+  ctx.strokeStyle = TEXT;
+  ctx.lineWidth = 1.5;
+  roundRect(ctx, bx - 40, by - 13, 80, 22, 8);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = TEXT;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font = `bold 12px ${GOTHIC}`;
+  ctx.fillText("乗りまーす！", bx, by - 2);
+  ctx.restore();
+}
+
+// 特別な乗客の目印
+function drawStar(ctx, { body }) {
+  ctx.save();
+  ctx.fillStyle = "#e9a90a";
+  ctx.strokeStyle = "#fff";
+  ctx.lineWidth = 3;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font = `bold 20px ${GOTHIC}`;
+  const y = body.bounds.min.y - 12;
+  ctx.strokeText("★", body.position.x, y);
+  ctx.fillText("★", body.position.x, y);
+  ctx.restore();
 }
 
 function roundRect(ctx, x, y, w, h, r) {

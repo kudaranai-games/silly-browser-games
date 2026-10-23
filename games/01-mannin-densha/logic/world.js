@@ -24,6 +24,8 @@ const SPAWN_SLOTS = [34, 100];
 const SPAWN_GAP_MS = 300;
 // 回転のしにくさの倍率
 const UPRIGHT = 4;
+// 駆け込み乗車の人。画面の左から、待っている人の頭を越えてドアへ飛び込み、しばらく前へ進み続ける。
+const RUNNER = { x: 24, y: CAR.floor - 130, vx: 12, vy: -4, push: 9, ms: 1500, until: CAR.left + 40 };
 
 // data: game.json。rng: [0, 1) を返す関数（乗客の種類を決める）
 export function createWorld(Matter, data, rng) {
@@ -33,6 +35,8 @@ export function createWorld(Matter, data, rng) {
   let held = null; // ドラッグ中の { body, constraint }
   let spawnWait = 0;
   let frozen = false;
+  let runner = null;
+  let elapsed = 0; // 経過時間（ms）
 
   Composite.add(engine.world, walls(Bodies));
 
@@ -69,6 +73,7 @@ export function createWorld(Matter, data, rng) {
     if (frozen) return;
     for (let i = 0; i < SUBSTEPS; i++) {
       // 速さは Matter の基準（1/60秒あたり）で読み書きする
+      if (runner?.dashing) dash(runner);
       for (const { body, type } of passengers) {
         // おじさんはなぜか回転する（つかまれている間も）
         if (type.spin && Math.abs(Body.getAngularVelocity(body)) < type.spin) Body.setAngularVelocity(body, type.spin);
@@ -78,7 +83,28 @@ export function createWorld(Matter, data, rng) {
       }
       Engine.update(engine, STEP_MS / SUBSTEPS);
     }
+    elapsed += ms;
     refill(ms);
+  }
+
+  // 駆け込み乗車の人を走らせる。1回の遊びで1人だけ。
+  function launchRunner() {
+    if (runner || frozen) return null;
+    runner = spawn(data.runner, RUNNER.x, RUNNER.y);
+    runner.dashing = true;
+    runner.dashEnd = elapsed + RUNNER.ms;
+    Body.setVelocity(runner.body, { x: RUNNER.vx, y: RUNNER.vy });
+    return runner;
+  }
+
+  // 車内の奥へ入るか、時間切れか、つかまれるまで、前へ進み続ける
+  function dash(p) {
+    if (held?.body === p.body || elapsed >= p.dashEnd || p.body.position.x >= RUNNER.until) {
+      p.dashing = false;
+      return;
+    }
+    const v = Body.getVelocity(p.body);
+    if (v.x < RUNNER.push) Body.setVelocity(p.body, { x: RUNNER.push, y: v.y });
   }
 
   // (x, y) にいる乗客をつかむ。つかめたら true
@@ -114,7 +140,14 @@ export function createWorld(Matter, data, rng) {
     const pinchedBodies = new Set(Query.collides(door, passengers.map((p) => p.body)).map((c) => (c.bodyA === door ? c.bodyB : c.bodyA)));
     const pinched = passengers.filter((p) => pinchedBodies.has(p.body));
     const inside = passengers.filter((p) => !pinchedBodies.has(p.body) && isInside(p.body.position));
-    return { inside: inside.length, pinched: pinched.length, pinchedIds: pinched.map((p) => p.id) };
+    const specials = inside.filter((p) => p.type.bonus > 0);
+    return {
+      inside: inside.length,
+      pinched: pinched.length,
+      pinchedIds: pinched.map((p) => p.id),
+      specials: specials.length,
+      bonus: specials.reduce((sum, p) => sum + p.type.bonus, 0),
+    };
   }
 
   return {
@@ -125,12 +158,13 @@ export function createWorld(Matter, data, rng) {
     drag,
     release,
     closeDoor,
+    launchRunner,
     isHolding: () => held !== null,
     // 今、車内にいる人数（遊んでいる途中の表示用）
     insideCount: () => passengers.filter((p) => isInside(p.body.position)).length,
     // テスト用: 指定の種類の乗客を指定の位置に置く
     place(typeId, x, y) {
-      return spawn(data.passengers.find((t) => t.id === typeId), x, y);
+      return spawn([...data.passengers, data.runner].find((t) => t.id === typeId), x, y);
     },
   };
 }

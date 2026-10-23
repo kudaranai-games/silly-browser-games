@@ -1,11 +1,11 @@
 // 乗車率の計算と判定、自己ベスト。
 
-// result: { inside, pinched }（closeDoor の結果）。data: game.json
-// rate は減点前の乗車率、score は挟まりの減点後（0 未満にはしない）。
-export function scoreOf({ inside, pinched }, data) {
+// result: { inside, pinched, specials, bonus }（closeDoor の結果）。data: game.json
+// rate は車内の人数だけで出した乗車率。score は特別な乗客のボーナスを足し、挟まりの減点を引いたもの（0 未満にはしない）。
+export function scoreOf({ inside, pinched, specials = 0, bonus = 0 }, data) {
   const rate = Math.round((inside / data.capacity) * 100);
   const penalty = pinched * data.pinchPenalty;
-  return { rate, pinched, penalty, score: Math.max(0, rate - penalty) };
+  return { rate, pinched, penalty, specials, bonus, score: Math.max(0, rate + bonus - penalty) };
 }
 
 // score 以上の min を持つ判定のうち、いちばん上のもの

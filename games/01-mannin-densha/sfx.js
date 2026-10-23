@@ -14,6 +14,10 @@ export function createSfx() {
     whoosh() {
       noise(0, 0.15, 0.25, 2400);
     },
+    // 駆け込み乗車の人の足音（タタタタッ）
+    dash() {
+      for (let i = 0; i < 6; i++) noise(i * 0.07, 0.04, 0.35, 1400);
+    },
     // 残り3秒からの秒読み
     tick() {
       tone("square", 1320, 1320, 0, 0.05, 0.08);

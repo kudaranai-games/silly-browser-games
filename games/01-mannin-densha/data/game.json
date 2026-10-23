@@ -8,8 +8,13 @@
     { "id": "backpack", "label": "リュックの人", "w": 52, "h": 70, "density": 0.0018, "friction": 0.8, "weight": 2, "clothes": "#5a7d4f", "skin": "#e8bf98", "bag": "#c8742c" },
     { "id": "ojisan", "label": "おじさん", "w": 38, "h": 64, "density": 0.0022, "friction": 0.4, "weight": 2, "spin": 0.12, "clothes": "#7a6a58", "skin": "#e9b98f", "bald": true },
     { "id": "student", "label": "学生", "w": 26, "h": 58, "density": 0.0015, "friction": 0.5, "weight": 3, "clothes": "#1f2a44", "skin": "#f3cfae" },
-    { "id": "luggage", "label": "大荷物の人", "w": 48, "h": 68, "density": 0.003, "friction": 0.6, "weight": 1, "clothes": "#8a4b5c", "skin": "#efc4a0", "bag": "#3d3d3d" }
+    { "id": "luggage", "label": "大荷物の人", "w": 48, "h": 68, "density": 0.003, "friction": 0.6, "weight": 1, "clothes": "#8a4b5c", "skin": "#efc4a0", "bag": "#3d3d3d" },
+    { "id": "climber", "label": "登山リュックの人", "w": 66, "h": 84, "density": 0.0022, "friction": 0.8, "weight": 0.5, "bonus": 30, "clothes": "#c0392b", "skin": "#e8bf98", "bag": "#2e6b8a", "bagW": 26 },
+    { "id": "guitar", "label": "ギターの人", "w": 40, "h": 100, "density": 0.0016, "friction": 0.5, "weight": 0.5, "bonus": 30, "clothes": "#2b2620", "skin": "#f1c9a5", "bag": "#111111", "bagW": 14, "personH": 74 },
+    { "id": "plush", "label": "巨大ぬいぐるみの人", "w": 70, "h": 68, "density": 0.0012, "friction": 0.9, "weight": 0.5, "bonus": 30, "clothes": "#6d5a8a", "skin": "#f3cfae", "bag": "#c98a4b", "bagW": 30 }
   ],
+  "runner": { "id": "runner", "label": "駆け込み乗車の人", "w": 30, "h": 70, "density": 0.0022, "friction": 0.5, "weight": 0, "clothes": "#d9472b", "skin": "#efc4a0" },
+  "runnerAtSec": 2,
   "tiers": [
     { "id": "garagara", "min": 0, "label": "がらがら", "verdict": "座れます。" },
     { "id": "tsujo", "min": 100, "label": "通常運行", "verdict": "定刻どおり発車します。" },

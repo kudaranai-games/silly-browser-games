@@ -11,10 +11,10 @@ const URL_ = "https://example.github.io/silly-browser-games/games/01-mannin-dens
 
 test("scoreOf: 乗車率は 車内の人数 ÷ 定員、挟まり1人ごとに減点、0 未満にはしない", () => {
   const d = { capacity: 5, pinchPenalty: 30 };
-  assert.deepEqual(scoreOf({ inside: 14, pinched: 0 }, d), { rate: 280, pinched: 0, penalty: 0, score: 280 });
-  assert.deepEqual(scoreOf({ inside: 14, pinched: 2 }, d), { rate: 280, pinched: 2, penalty: 60, score: 220 });
-  assert.deepEqual(scoreOf({ inside: 0, pinched: 0 }, d), { rate: 0, pinched: 0, penalty: 0, score: 0 });
-  assert.deepEqual(scoreOf({ inside: 1, pinched: 3 }, d), { rate: 20, pinched: 3, penalty: 90, score: 0 });
+  assert.deepEqual(scoreOf({ inside: 14, pinched: 0 }, d), { rate: 280, pinched: 0, penalty: 0, specials: 0, bonus: 0, score: 280 });
+  assert.deepEqual(scoreOf({ inside: 14, pinched: 2 }, d), { rate: 280, pinched: 2, penalty: 60, specials: 0, bonus: 0, score: 220 });
+  assert.deepEqual(scoreOf({ inside: 0, pinched: 0 }, d), { rate: 0, pinched: 0, penalty: 0, specials: 0, bonus: 0, score: 0 });
+  assert.deepEqual(scoreOf({ inside: 1, pinched: 3 }, d), { rate: 20, pinched: 3, penalty: 90, specials: 0, bonus: 0, score: 0 });
   // 端数は四捨五入（7 ÷ 3 = 233.3…%）
   assert.equal(scoreOf({ inside: 7, pinched: 0 }, { capacity: 3, pinchPenalty: 30 }).rate, 233);
 });
@@ -108,7 +108,44 @@ function xWeightedLength(text) {
 
 test("shareText: どの判定でも X の文字数上限に収まる", () => {
   const over = data.tiers
-    .map((t) => shareText({ score: 9999, pinched: data.maxPassengers, label: t.label, url: URL_ }))
+    .map((t) => shareText({ score: 9999, pinched: data.maxPassengers, specials: data.maxPassengers, label: t.label, url: URL_ }))
     .filter((text) => xWeightedLength(text) > 280);
   assert.deepEqual(over, []);
+});
+
+test("scoreOf: 特別な乗客のボーナスを足してから、挟まりを引く", () => {
+  const d = { capacity: 5, pinchPenalty: 30 };
+  assert.deepEqual(scoreOf({ inside: 10, pinched: 1, specials: 2, bonus: 60 }, d), {
+    rate: 200,
+    pinched: 1,
+    penalty: 30,
+    specials: 2,
+    bonus: 60,
+    score: 230,
+  });
+  // ボーナスで減点が相殺されることもある（0 未満の切り捨ては、足し引きのあと）
+  assert.equal(scoreOf({ inside: 0, pinched: 1, specials: 1, bonus: 30 }, d).score, 0);
+  assert.equal(scoreOf({ inside: 1, pinched: 1, specials: 1, bonus: 30 }, d).score, 20);
+});
+
+test("特別な乗客: ボーナスがあり、ふつうの乗客より出にくい", () => {
+  const specials = data.passengers.filter((p) => p.bonus > 0);
+  assert.deepEqual(specials.map((p) => p.id).sort(), ["climber", "guitar", "plush"]);
+  const minNormal = Math.min(...data.passengers.filter((p) => !p.bonus).map((p) => p.weight));
+  const tooCommon = specials.filter((p) => p.weight >= minNormal);
+  assert.deepEqual(tooCommon.map((p) => p.id), []);
+});
+
+test("駆け込み乗車の人: 物理の値があり、ふつうの抽選には出てこない", () => {
+  const r = data.runner;
+  assert.ok(r.w > 0 && r.h > 0 && r.density > 0 && r.label && r.clothes && r.skin);
+  assert.equal(data.passengers.some((p) => p.id === r.id), false);
+  assert.ok(data.runnerAtSec > 0 && data.runnerAtSec < data.timeLimitSec);
+});
+
+test("shareText: 特別な乗客がいれば、その行を出す", () => {
+  assert.equal(
+    shareText({ score: 310, pinched: 1, specials: 2, label: "物理法則の向こう側", url: URL_ }),
+    ["満員電車押し込みパズル", "乗車率 310%", "特別な乗客 2人", "駆け込み乗車 1人", "判定: 物理法則の向こう側", URL_].join("\n")
+  );
 });

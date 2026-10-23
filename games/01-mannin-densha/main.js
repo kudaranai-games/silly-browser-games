@@ -82,6 +82,10 @@ function frame(now) {
     const left = timeLeft(now);
     // 残り3秒から1秒ごとに鳴らす
     for (const s of [3, 2, 1]) cue(`tick${s}`, left <= s, () => sfx.tick());
+    cue("runner", left <= data.runnerAtSec, () => {
+      world.launchRunner();
+      sfx.dash();
+    });
     if (left <= 0) startClosing(now);
   }
   if (phase === "closing" && now - closeStart >= DOOR_MS) finishClosing(now);
@@ -160,6 +164,7 @@ function skipVerdict() {
 function showResult() {
   $("result-tier").textContent = result.tier.label;
   $("result-detail").textContent = `乗車率 ${result.score}%（車内 ${result.inside}人・定員 ${data.capacity}人）`;
+  $("result-specials").textContent = result.specials > 0 ? `特別な乗客 ${result.specials}人で +${result.bonus}%` : "";
   $("result-pinched").textContent =
     result.pinched > 0 ? `駆け込み乗車 ${result.pinched}人で −${result.penalty}%` : "";
   $("result-verdict").textContent = result.tier.verdict;
@@ -215,7 +220,9 @@ function updateMuteButton() {
 
 $("next-btn").addEventListener("click", startRound);
 $("share-btn").addEventListener("click", () => {
-  openXIntent(shareText({ score: result.score, pinched: result.pinched, label: result.tier.label, url: pageUrl() }));
+  openXIntent(
+    shareText({ score: result.score, pinched: result.pinched, specials: result.specials, label: result.tier.label, url: pageUrl() })
+  );
 });
 // 演出の途中で保存しても、結果が出そろった画像になるようにする
 $("save-btn").addEventListener("click", () => {

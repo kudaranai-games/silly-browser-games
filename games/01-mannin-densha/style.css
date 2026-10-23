@@ -105,3 +105,5 @@ button.primary {
 #result-pinched:empty { display: none; }
 /* タイトルが長いので、音のボタンと重ならないよう小さくする */
 h1 { font-size: 1.05rem; letter-spacing: 0.1em; text-align: left; }
+#result-specials { color: #b8860b; font-weight: bold; }
+#result-specials:empty { display: none; }
